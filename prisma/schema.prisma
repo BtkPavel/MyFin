@@ -16,6 +16,7 @@ model User {
   loans          Loan[]
   reservations  Reservation[]
   subscriptions  Subscription[]
+  debts          Debt[]
 
   @@map("users")
 }
@@ -99,6 +100,22 @@ model Reservation {
 
   @@index([userId])
   @@map("reservations")
+}
+
+model Debt {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // OWED_TO_ME | I_OWE
+  name        String   // кто должен / кому должен
+  amount      Decimal
+  currency    String   @default("BYN")
+  description String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("debts")
 }
 
 model ExchangeRate {
