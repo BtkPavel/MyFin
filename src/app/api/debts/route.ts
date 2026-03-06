@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await getDefaultUserId();
     const body = await request.json();
-    const { type, name, amount, currency, description } = body;
+    const { type, name, amount, description } = body;
 
     if (!type || !name || amount == null) {
       return NextResponse.json(
