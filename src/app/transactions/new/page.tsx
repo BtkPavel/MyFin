@@ -11,12 +11,21 @@ interface Category {
   icon?: string;
 }
 
+interface Loan {
+  id: string;
+  name: string;
+  status: string;
+  remainingAmount: string;
+}
+
 export default function NewTransactionPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loans, setLoans] = useState<Loan[]>([]);
   const [type, setType] = useState<"INCOME" | "EXPENSE">("EXPENSE");
   const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [loanId, setLoanId] = useState("");
   const [date, setDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
@@ -34,15 +43,32 @@ export default function NewTransactionPage() {
   }, []);
 
   useEffect(() => {
+    fetch("/api/loans")
+      .then((r) => r.json())
+      .then((loansList: Loan[]) =>
+        setLoans(loansList.filter((l) => l.status === "ACTIVE"))
+      )
+      .catch(() => setLoans([]));
+  }, []);
+
+  useEffect(() => {
     const filtered = categories.filter((c) => c.type === type);
     if (filtered.length && !filtered.some((c) => c.id === categoryId)) {
       setCategoryId(filtered[0].id);
     }
   }, [type, categories]);
 
+  const selectedCategory = categories.find((c) => c.id === categoryId);
+  const isInstallmentPayment = selectedCategory?.name === "Оплата рассрочки";
+  const activeLoans = loans.filter((l) => l.status === "ACTIVE");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !categoryId) return;
+    if (isInstallmentPayment && !loanId) {
+      alert("Выберите рассрочку или кредит");
+      return;
+    }
     setSubmitting(true);
     const res = await fetch("/api/transactions", {
       method: "POST",
@@ -51,6 +77,7 @@ export default function NewTransactionPage() {
         type,
         amount: parseFloat(amount),
         categoryId,
+        loanId: isInstallmentPayment ? loanId : undefined,
         date: new Date(date).toISOString(),
         description: description || undefined,
       }),
@@ -64,27 +91,32 @@ export default function NewTransactionPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b border-slate-200 px-4 py-4 safe-area-pt flex items-center gap-4">
-        <Link href="/" className="text-slate-600">
+      <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-5 py-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex items-center gap-4">
+        <Link
+          href="/"
+          className="text-[var(--accent-primary)] font-medium text-sm"
+        >
           ← Назад
         </Link>
-        <h1 className="text-xl font-bold text-slate-800">Новая операция</h1>
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+          Новая операция
+        </h1>
       </header>
 
       <main className="p-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Тип
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setType("INCOME")}
-                className={`flex-1 py-2 rounded-xl font-medium ${
+                className={`flex-1 py-3 rounded-[var(--radius-md)] font-medium text-sm transition-all ${
                   type === "INCOME"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[var(--accent-income)] text-white"
+                    : "bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
                 }`}
               >
                 Доход
@@ -92,10 +124,10 @@ export default function NewTransactionPage() {
               <button
                 type="button"
                 onClick={() => setType("EXPENSE")}
-                className={`flex-1 py-2 rounded-xl font-medium ${
+                className={`flex-1 py-3 rounded-[var(--radius-md)] font-medium text-sm transition-all ${
                   type === "EXPENSE"
-                    ? "bg-rose-600 text-white"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[var(--accent-expense)] text-white"
+                    : "bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
                 }`}
               >
                 Расход
@@ -104,7 +136,7 @@ export default function NewTransactionPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Сумма (BYN)
             </label>
             <input
@@ -113,20 +145,23 @@ export default function NewTransactionPage() {
               min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-lg"
+              className="input-field text-lg font-semibold tabular-nums"
               placeholder="0.00"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Категория
             </label>
             <select
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200"
+              onChange={(e) => {
+                setCategoryId(e.target.value);
+                setLoanId("");
+              }}
+              className="input-field"
               required
             >
               {filteredCategories.map((c) => (
@@ -137,36 +172,70 @@ export default function NewTransactionPage() {
             </select>
           </div>
 
+          {isInstallmentPayment && type === "EXPENSE" && (
+            <div>
+              <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
+                Рассрочка / Кредит
+              </label>
+              <select
+                value={loanId}
+                onChange={(e) => setLoanId(e.target.value)}
+                className="input-field"
+                required
+              >
+                <option value="">— Выберите —</option>
+                {activeLoans.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name} (осталось{" "}
+                    {parseFloat(l.remainingAmount).toLocaleString("ru-BY", {
+                      minimumFractionDigits: 2,
+                    })}{" "}
+                    BYN)
+                  </option>
+                ))}
+              </select>
+              {activeLoans.length === 0 && (
+                <p className="text-[var(--text-tertiary)] text-xs mt-2">
+                  Нет активных кредитов. Добавьте в разделе Кредиты.
+                </p>
+              )}
+            </div>
+          )}
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Дата
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200"
+              className="input-field"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Описание (необязательно)
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
+              Описание
             </label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200"
+              className="input-field"
               placeholder="Комментарий"
             />
           </div>
 
           <button
             type="submit"
-            disabled={submitting || !amount}
-            className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold disabled:opacity-50"
+            disabled={
+              submitting ||
+              !amount ||
+              (isInstallmentPayment && (!loanId || activeLoans.length === 0))
+            }
+            className="w-full py-3.5 btn-primary text-base disabled:opacity-50"
           >
             {submitting ? "Сохранение..." : "Сохранить"}
           </button>

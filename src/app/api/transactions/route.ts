@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const transactions = await prisma.transaction.findMany({
       where,
-      include: { category: true },
+      include: { category: true, loan: true },
       orderBy: { date: "desc" },
       take: 200,
     });
@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await getDefaultUserId();
     const body = await request.json();
-    const { type, amount, currency, categoryId, date, description } = body;
+    const { type, amount, currency, categoryId, loanId, date, description } =
+      body;
 
     if (!type || !amount || !categoryId || !date) {
       return NextResponse.json(
@@ -50,17 +51,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const amountNum = Number(amount);
+
+    if (loanId && type === "EXPENSE") {
+      const loan = await prisma.loan.findFirst({
+        where: { id: loanId, userId },
+      });
+      if (!loan) {
+        return NextResponse.json(
+          { error: "Loan not found" },
+          { status: 400 }
+        );
+      }
+      const remaining = Number(loan.remainingAmount);
+      const newRemaining = Math.max(0, remaining - amountNum);
+
+      const transaction = await prisma.$transaction(async (tx) => {
+        const txn = await tx.transaction.create({
+          data: {
+            userId,
+            type,
+            amount: new Decimal(amountNum),
+            currency: currency || "BYN",
+            categoryId,
+            loanId,
+            date: new Date(date),
+            description: description || null,
+          },
+          include: { category: true, loan: true },
+        });
+        await tx.loan.update({
+          where: { id: loanId },
+          data: {
+            remainingAmount: new Decimal(newRemaining),
+            status: newRemaining <= 0 ? "PAID" : loan.status,
+          },
+        });
+        return txn;
+      });
+      return NextResponse.json(transaction);
+    }
+
     const transaction = await prisma.transaction.create({
       data: {
         userId,
         type,
-        amount: new Decimal(amount),
+        amount: new Decimal(amountNum),
         currency: currency || "BYN",
         categoryId,
         date: new Date(date),
         description: description || null,
       },
-      include: { category: true },
+      include: { category: true, loan: true },
     });
     return NextResponse.json(transaction);
   } catch (error) {

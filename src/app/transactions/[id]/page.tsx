@@ -36,8 +36,8 @@ export default function TransactionDetailPage() {
 
   if (!transaction) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-slate-500">Загрузка...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
+        <div className="w-8 h-8 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -48,20 +48,23 @@ export default function TransactionDetailPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b border-slate-200 px-4 py-4 safe-area-pt flex items-center justify-between">
-        <Link href="/transactions" className="text-slate-600">
+      <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-5 py-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex items-center justify-between">
+        <Link
+          href="/transactions"
+          className="text-[var(--accent-primary)] font-medium text-sm"
+        >
           ← Назад
         </Link>
         <div className="flex gap-2">
           <Link
             href={`/transactions/${params.id}/edit`}
-            className="px-3 py-1.5 bg-slate-100 rounded-lg text-sm"
+            className="px-3 py-2 rounded-[var(--radius-md)] bg-[var(--bg-base)] text-[var(--text-secondary)] text-sm font-medium"
           >
             Редактировать
           </Link>
           <button
             onClick={deleteTransaction}
-            className="px-3 py-1.5 bg-rose-100 text-rose-600 rounded-lg text-sm"
+            className="px-3 py-2 rounded-[var(--radius-md)] bg-[var(--accent-expense-muted)] text-[var(--accent-expense)] text-sm font-medium"
           >
             Удалить
           </button>
@@ -69,14 +72,26 @@ export default function TransactionDetailPage() {
       </header>
 
       <main className="p-4">
-        <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-          <span className="text-5xl block mb-2">
-            {transaction.category?.icon || "•"}
-          </span>
-          <h2 className="text-xl font-semibold text-slate-800">
+        <div className="card-elevated p-8 text-center">
+          <div
+            className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl"
+            style={{
+              backgroundColor:
+                transaction.type === "INCOME"
+                  ? "var(--accent-primary-muted)"
+                  : "var(--accent-expense-muted)",
+              color:
+                transaction.type === "INCOME"
+                  ? "var(--accent-income)"
+                  : "var(--accent-expense)",
+            }}
+          >
+            {transaction.category?.icon || (transaction.type === "INCOME" ? "+" : "−")}
+          </div>
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">
             {transaction.category?.name}
           </h2>
-          <p className="text-slate-500 mt-1">
+          <p className="text-[var(--text-tertiary)] text-sm mt-1">
             {new Date(transaction.date).toLocaleDateString("ru-BY", {
               weekday: "long",
               day: "numeric",
@@ -84,23 +99,23 @@ export default function TransactionDetailPage() {
               year: "numeric",
             })}
           </p>
-          <div className="mt-4">
+          <div className="mt-6">
             <span
-              className={
+              className={`text-2xl font-semibold tabular-nums ${
                 transaction.type === "INCOME"
-                  ? "text-emerald-600 text-2xl font-bold"
-                  : "text-rose-600 text-2xl font-bold"
-              }
+                  ? "text-[var(--accent-income)]"
+                  : "text-[var(--accent-expense)]"
+              }`}
             >
-              {transaction.type === "INCOME" ? "+" : "-"}
+              {transaction.type === "INCOME" ? "+" : "−"}
               {format(amount)} BYN
             </span>
-            <div className="mt-2">
+            <div className="mt-3">
               <CurrencyConverter amount={amount} />
             </div>
           </div>
           {transaction.description && (
-            <p className="mt-4 text-slate-600 text-sm">
+            <p className="mt-6 text-[var(--text-secondary)] text-sm border-t border-[var(--border-subtle)] pt-6">
               {transaction.description}
             </p>
           )}

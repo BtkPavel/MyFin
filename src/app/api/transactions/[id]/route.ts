@@ -12,7 +12,7 @@ export async function GET(
     const { id } = await params;
     const transaction = await prisma.transaction.findFirst({
       where: { id, userId },
-      include: { category: true },
+      include: { category: true, loan: true },
     });
     if (!transaction)
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -52,7 +52,7 @@ export async function PATCH(
     const transaction = await prisma.transaction.update({
       where: { id },
       data: updateData,
-      include: { category: true },
+      include: { category: true, loan: true },
     });
     return NextResponse.json(transaction);
   } catch (error) {

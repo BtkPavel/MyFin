@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#059669",
+  themeColor: "#0F766E",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className="min-h-screen bg-slate-50 antialiased pb-20">
+      <body className="min-h-screen bg-[var(--bg-base)] font-outfit antialiased pb-20">
         <ServiceWorkerRegistration />
         <MobileGuard>
           {children}

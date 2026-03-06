@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  baseCurrency String        @default("BYN")
-  createdAt    DateTime      @default(now())
-  transactions Transaction[]
-  loans        Loan[]
-  reservations Reservation[]
+  id             String        @id @default(cuid())
+  baseCurrency   String        @default("BYN")
+  openingBalance Decimal       @default(0)
+  createdAt      DateTime      @default(now())
+  transactions   Transaction[]
+  loans          Loan[]
+  reservations  Reservation[]
 
   @@map("users")
 }
@@ -37,6 +38,8 @@ model Transaction {
   currency    String   @default("BYN")
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  loanId      String?
+  loan        Loan?    @relation(fields: [loanId], references: [id], onDelete: SetNull)
   date        DateTime
   description String?
   createdAt   DateTime @default(now())
@@ -47,9 +50,10 @@ model Transaction {
 }
 
 model Loan {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
   name            String
   type            String // LOAN | INSTALLMENT
   totalAmount     Decimal

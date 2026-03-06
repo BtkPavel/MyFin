@@ -44,18 +44,23 @@ export default function LoansPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b border-slate-200 px-4 py-4 safe-area-pt">
-        <h1 className="text-xl font-bold text-slate-800">Кредиты и рассрочки</h1>
-        <p className="text-sm text-slate-500 mt-1">
+      <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-5 py-4 pt-[calc(env(safe-area-inset-top)+1rem)]">
+        <h1 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
+          Кредиты и рассрочки
+        </h1>
+        <p className="text-sm text-[var(--text-tertiary)] mt-1">
           Отслеживайте погашение
         </p>
       </header>
 
       <main className="p-4 pb-8">
         {loading ? (
-          <div className="animate-pulse space-y-3">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-slate-200 rounded-xl" />
+              <div
+                key={i}
+                className="h-28 animate-pulse bg-[var(--border-subtle)]/50 rounded-[var(--radius-lg)]"
+              />
             ))}
           </div>
         ) : showForm ? (
@@ -67,18 +72,20 @@ export default function LoansPage() {
             onCancel={() => setShowForm(false)}
           />
         ) : loans.length === 0 ? (
-          <div className="text-center py-12 text-slate-500">
-            <p className="text-4xl mb-4">💳</p>
-            <p>Нет кредитов или рассрочек</p>
+          <div className="card p-12 text-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--accent-primary-muted)] flex items-center justify-center text-[var(--accent-primary)] text-2xl">
+              ◈
+            </div>
+            <p className="text-[var(--text-secondary)]">Нет кредитов или рассрочек</p>
             <button
               onClick={() => setShowForm(true)}
-              className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-xl"
+              className="mt-4 btn-primary"
             >
               Добавить
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {loans.map((loan) => (
               <LoanCard
                 key={loan.id}
@@ -91,7 +98,7 @@ export default function LoansPage() {
             ))}
             <button
               onClick={() => setShowForm(true)}
-              className="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-medium"
+              className="w-full py-3 border-2 border-dashed border-[var(--border-strong)] rounded-[var(--radius-lg)] text-[var(--text-tertiary)] font-medium text-sm"
             >
               + Добавить кредит или рассрочку
             </button>
@@ -137,32 +144,32 @@ function LoanCard({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4">
+    <div className="card p-4">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-slate-800">{loan.name}</h3>
-          <span className="text-xs text-slate-500">
+          <h3 className="font-semibold text-[var(--text-primary)]">{loan.name}</h3>
+          <span className="text-[11px] text-[var(--text-tertiary)]">
             {loan.type === "INSTALLMENT" ? "Рассрочка" : "Кредит"}
           </span>
         </div>
         <span
-          className={`px-2 py-0.5 rounded text-xs ${
+          className={`px-2 py-1 rounded-[var(--radius-sm)] text-[11px] font-medium ${
             loan.status === "PAID"
-              ? "bg-emerald-100 text-emerald-700"
+              ? "bg-[var(--accent-primary-muted)] text-[var(--accent-income)]"
               : "bg-amber-100 text-amber-700"
           }`}
         >
           {loan.status === "PAID" ? "Погашен" : "Активен"}
         </span>
       </div>
-      <div className="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
+      <div className="mt-3 h-1.5 bg-[var(--border-subtle)] rounded-full overflow-hidden">
         <div
-          className="h-full bg-emerald-500 rounded-full transition-all"
+          className="h-full bg-[var(--accent-primary)] rounded-full transition-all duration-300"
           style={{ width: `${Math.min(100, prog)}%` }}
         />
       </div>
       <div className="mt-3 flex justify-between text-sm">
-        <span className="text-slate-500">
+        <span className="text-[var(--text-secondary)]">
           Осталось: {format(remaining)} BYN
         </span>
         <CurrencyConverter amount={remaining} />
@@ -170,26 +177,26 @@ function LoanCard({
       {loan.status !== "PAID" && (
         <button
           onClick={() => setShowPay(!showPay)}
-          className="mt-3 w-full py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium"
+          className="mt-3 w-full py-2.5 bg-[var(--accent-primary-muted)] text-[var(--accent-primary)] rounded-[var(--radius-md)] text-sm font-medium"
         >
           {showPay ? "Отмена" : "Внести платёж"}
         </button>
       )}
       {showPay && (
-        <div className="mt-2 p-3 bg-slate-50 rounded-lg">
-          <p className="text-sm text-slate-600 mb-2">
+        <div className="mt-2 p-3 bg-[var(--bg-base)] rounded-[var(--radius-md)]">
+          <p className="text-sm text-[var(--text-secondary)] mb-2">
             Записать платёж {format(parseFloat(loan.monthlyPayment))} BYN?
           </p>
           <div className="flex gap-2">
             <button
               onClick={recordPayment}
-              className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-sm"
+              className="flex-1 py-2 btn-primary text-sm"
             >
               Да
             </button>
             <button
               onClick={() => setShowPay(false)}
-              className="flex-1 py-2 bg-slate-200 rounded-lg text-sm"
+              className="flex-1 py-2 rounded-[var(--radius-md)] bg-[var(--border-subtle)] text-[var(--text-secondary)] text-sm font-medium"
             >
               Отмена
             </button>
@@ -242,26 +249,26 @@ function LoanForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
           Название
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-slate-200"
+          className="input-field"
           placeholder="Кредит на авто, Рассрочка iPhone..."
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
           Тип
         </label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as "LOAN" | "INSTALLMENT")}
-          className="w-full px-4 py-3 rounded-xl border border-slate-200"
+          className="input-field"
         >
           <option value="LOAN">Кредит</option>
           <option value="INSTALLMENT">Рассрочка</option>
@@ -269,7 +276,7 @@ function LoanForm({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
             Сумма (BYN)
           </label>
           <input
@@ -277,12 +284,12 @@ function LoanForm({
             step="0.01"
             value={totalAmount}
             onChange={(e) => setTotalAmount(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200"
+            className="input-field"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
             Платёж/мес (BYN)
           </label>
           <input
@@ -290,39 +297,39 @@ function LoanForm({
             step="0.01"
             value={monthlyPayment}
             onChange={(e) => setMonthlyPayment(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200"
+            className="input-field"
             required
           />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
             Дата начала
           </label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200"
+            className="input-field"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
             Дата окончания
           </label>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200"
+            className="input-field"
             required
           />
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
+        <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
           День платежа (1–28)
         </label>
         <input
@@ -331,21 +338,21 @@ function LoanForm({
           max="28"
           value={dueDay}
           onChange={(e) => setDueDay(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-slate-200"
+          className="input-field"
         />
       </div>
       <div className="flex gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 bg-slate-100 rounded-xl font-medium"
+          className="flex-1 py-3 rounded-[var(--radius-md)] bg-[var(--border-subtle)] text-[var(--text-secondary)] font-medium"
         >
           Отмена
         </button>
         <button
           type="submit"
           disabled={submitting}
-          className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-semibold disabled:opacity-50"
+          className="flex-1 py-3 btn-primary disabled:opacity-50"
         >
           {submitting ? "Сохранение..." : "Добавить"}
         </button>

@@ -22,27 +22,31 @@ export default function MobileGuard({
 
   if (isMobile === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <div className="animate-pulse text-slate-500">Загрузка...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[var(--text-tertiary)] text-sm">Загрузка</p>
+        </div>
       </div>
     );
   }
 
   if (!isMobile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 p-8">
-        <div className="max-w-md text-center space-y-6">
-          <div className="text-6xl">📱</div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            MyFin — мобильное приложение
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-[var(--bg-base)]">
+        <div className="max-w-sm text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--accent-primary-muted)] flex items-center justify-center text-[var(--accent-primary)] text-4xl">
+            ◆
+          </div>
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">
+            MyFin
           </h1>
-          <p className="text-slate-600">
-            Откройте это приложение на телефоне или планшете. Для лучшего
-            опыта добавьте его на главный экран (меню браузера → «Добавить на
-            экран»).
+          <p className="mt-2 text-[var(--text-secondary)] leading-relaxed">
+            Откройте приложение на телефоне для лучшего опыта. Добавьте на
+            главный экран через меню браузера.
           </p>
-          <p className="text-sm text-slate-500">
-            Или уменьшите окно браузера для тестирования
+          <p className="mt-4 text-[11px] text-[var(--text-tertiary)]">
+            Или уменьшите окно для тестирования
           </p>
         </div>
       </div>

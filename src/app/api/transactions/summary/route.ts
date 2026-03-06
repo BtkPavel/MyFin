@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getDefaultUserId } from "@/lib/db-utils";
+
 export async function GET(request: NextRequest) {
   try {
     const userId = await getDefaultUserId();
@@ -15,25 +16,42 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    const [income, expenses] = await Promise.all([
-      prisma.transaction.aggregate({
-        where: { userId, type: "INCOME", ...dateFilter },
-        _sum: { amount: true },
-      }),
-      prisma.transaction.aggregate({
-        where: { userId, type: "EXPENSE", ...dateFilter },
-        _sum: { amount: true },
-      }),
-    ]);
+    const [user, periodIncome, periodExpenses, allIncome, allExpenses] =
+      await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { openingBalance: true },
+        }),
+        prisma.transaction.aggregate({
+          where: { userId, type: "INCOME", ...dateFilter },
+          _sum: { amount: true },
+        }),
+        prisma.transaction.aggregate({
+          where: { userId, type: "EXPENSE", ...dateFilter },
+          _sum: { amount: true },
+        }),
+        prisma.transaction.aggregate({
+          where: { userId, type: "INCOME" },
+          _sum: { amount: true },
+        }),
+        prisma.transaction.aggregate({
+          where: { userId, type: "EXPENSE" },
+          _sum: { amount: true },
+        }),
+      ]);
 
-    const incomeTotal = Number(income._sum.amount || 0);
-    const expenseTotal = Number(expenses._sum.amount || 0);
-    const balance = incomeTotal - expenseTotal;
+    const openingBalance = Number(user?.openingBalance || 0);
+    const incomeTotal = Number(periodIncome._sum.amount || 0);
+    const expenseTotal = Number(periodExpenses._sum.amount || 0);
+    const totalIncome = Number(allIncome._sum.amount || 0);
+    const totalExpenses = Number(allExpenses._sum.amount || 0);
 
     return NextResponse.json({
       income: incomeTotal,
       expenses: expenseTotal,
-      balance,
+      balance: incomeTotal - expenseTotal,
+      openingBalance,
+      totalBalance: openingBalance + totalIncome - totalExpenses,
     });
   } catch (error) {
     console.error("Summary GET error:", error);

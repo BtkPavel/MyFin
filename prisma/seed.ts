@@ -15,6 +15,7 @@ const expenseCategories = [
   { name: "Продукты", icon: "🛒" },
   { name: "Транспорт", icon: "🚗" },
   { name: "Жильё", icon: "🏠" },
+  { name: "Оплата рассрочки", icon: "💳" },
   { name: "Здоровье", icon: "💊" },
   { name: "Развлечения", icon: "🎬" },
   { name: "Одежда", icon: "👕" },

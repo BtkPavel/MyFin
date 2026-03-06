@@ -78,35 +78,40 @@ export default function EditTransactionPage() {
 
   if (loading || !transaction) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-slate-500">Загрузка...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
+        <div className="w-8 h-8 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b border-slate-200 px-4 py-4 safe-area-pt flex items-center gap-4">
-        <Link href="/transactions" className="text-slate-600">
+      <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-5 py-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex items-center gap-4">
+        <Link
+          href="/transactions"
+          className="text-[var(--accent-primary)] font-medium text-sm"
+        >
           ← Назад
         </Link>
-        <h1 className="text-xl font-bold text-slate-800">Редактировать</h1>
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+          Редактировать
+        </h1>
       </header>
 
       <main className="p-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Тип
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setType("INCOME")}
-                className={`flex-1 py-2 rounded-xl font-medium ${
+                className={`flex-1 py-3 rounded-[var(--radius-md)] font-medium text-sm transition-all ${
                   type === "INCOME"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[var(--accent-income)] text-white"
+                    : "bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
                 }`}
               >
                 Доход
@@ -114,10 +119,10 @@ export default function EditTransactionPage() {
               <button
                 type="button"
                 onClick={() => setType("EXPENSE")}
-                className={`flex-1 py-2 rounded-xl font-medium ${
+                className={`flex-1 py-3 rounded-[var(--radius-md)] font-medium text-sm transition-all ${
                   type === "EXPENSE"
-                    ? "bg-rose-600 text-white"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[var(--accent-expense)] text-white"
+                    : "bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-subtle)]"
                 }`}
               >
                 Расход
@@ -126,7 +131,7 @@ export default function EditTransactionPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Сумма (BYN)
             </label>
             <input
@@ -135,19 +140,19 @@ export default function EditTransactionPage() {
               min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-lg"
+              className="input-field text-lg font-semibold tabular-nums"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Категория
             </label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200"
+              className="input-field"
               required
             >
               {filteredCategories.map((c) => (
@@ -159,34 +164,34 @@ export default function EditTransactionPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Дата
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200"
+              className="input-field"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
               Описание
             </label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200"
+              className="input-field"
             />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold disabled:opacity-50"
+            className="w-full py-3.5 btn-primary disabled:opacity-50"
           >
             {submitting ? "Сохранение..." : "Сохранить"}
           </button>

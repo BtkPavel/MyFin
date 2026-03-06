@@ -8,6 +8,7 @@ interface Transaction {
   type: string;
   amount: string;
   category: { name: string; icon?: string };
+  loan?: { name: string };
   date: string;
   description?: string;
 }
@@ -53,17 +54,19 @@ export default function TransactionsPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b border-slate-200 px-4 py-4 safe-area-pt">
-        <h1 className="text-xl font-bold text-slate-800">Операции</h1>
-        <div className="flex gap-2 mt-2">
+      <header className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] px-5 py-4 pt-[calc(env(safe-area-inset-top)+1rem)]">
+        <h1 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
+          Операции
+        </h1>
+        <div className="flex gap-2 mt-3">
           {(["all", "INCOME", "EXPENSE"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+              className={`px-4 py-2 rounded-[var(--radius-md)] text-[13px] font-medium transition-all ${
                 filter === f
-                  ? "bg-emerald-600 text-white"
-                  : "bg-slate-100 text-slate-600"
+                  ? "bg-[var(--accent-primary)] text-white"
+                  : "bg-[var(--bg-base)] text-[var(--text-secondary)]"
               }`}
             >
               {f === "all" ? "Все" : f === "INCOME" ? "Доходы" : "Расходы"}
@@ -74,18 +77,23 @@ export default function TransactionsPage() {
 
       <main className="p-4 pb-8">
         {loading ? (
-          <div className="animate-pulse space-y-3">
+          <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-16 bg-slate-200 rounded-xl" />
+              <div
+                key={i}
+                className="h-20 animate-pulse bg-[var(--border-subtle)]/50 rounded-[var(--radius-lg)]"
+              />
             ))}
           </div>
         ) : transactions.length === 0 ? (
-          <div className="text-center py-12 text-slate-500">
-            <p className="text-4xl mb-4">📝</p>
-            <p>Нет операций</p>
+          <div className="card p-12 text-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--accent-primary-muted)] flex items-center justify-center text-[var(--accent-primary)] text-2xl">
+              ◇
+            </div>
+            <p className="text-[var(--text-secondary)]">Нет операций</p>
             <Link
               href="/transactions/new"
-              className="inline-block mt-4 px-6 py-2 bg-emerald-600 text-white rounded-xl"
+              className="inline-block mt-4 btn-primary"
             >
               Добавить
             </Link>
@@ -95,38 +103,60 @@ export default function TransactionsPage() {
             {transactions.map((t) => (
               <div
                 key={t.id}
-                className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-3"
+                className="card flex items-center gap-4 p-4"
               >
-                <span className="text-2xl">{t.category?.icon || "•"}</span>
+                <div
+                  className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center text-lg shrink-0"
+                  style={{
+                    backgroundColor:
+                      t.type === "INCOME"
+                        ? "var(--accent-primary-muted)"
+                        : "var(--accent-expense-muted)",
+                    color:
+                      t.type === "INCOME"
+                        ? "var(--accent-income)"
+                        : "var(--accent-expense)",
+                  }}
+                >
+                  {t.category?.icon || (t.type === "INCOME" ? "+" : "−")}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-800">{t.category?.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="font-medium text-[var(--text-primary)]">
+                    {t.category?.name}
+                    {t.loan && (
+                      <span className="text-[var(--text-tertiary)] font-normal">
+                        {" "}
+                        · {t.loan.name}
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-tertiary)]">
                     {new Date(t.date).toLocaleDateString("ru-BY")}
                     {t.description && ` · ${t.description}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={
+                    className={`font-semibold tabular-nums ${
                       t.type === "INCOME"
-                        ? "text-emerald-600 font-semibold"
-                        : "text-rose-600 font-semibold"
-                    }
+                        ? "text-[var(--accent-income)]"
+                        : "text-[var(--accent-expense)]"
+                    }`}
                   >
-                    {t.type === "INCOME" ? "+" : "-"}
+                    {t.type === "INCOME" ? "+" : "−"}
                     {format(parseFloat(t.amount))} BYN
                   </span>
                   <Link
                     href={`/transactions/${t.id}/edit`}
-                    className="text-slate-400 hover:text-slate-600"
+                    className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:bg-[var(--bg-base)]"
                   >
-                    ✏️
+                    ✎
                   </Link>
                   <button
                     onClick={() => deleteTransaction(t.id)}
-                    className="text-slate-400 hover:text-rose-500"
+                    className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:text-[var(--accent-expense)] hover:bg-[var(--accent-expense-muted)]"
                   >
-                    🗑️
+                    ⌫
                   </button>
                 </div>
               </div>
@@ -137,7 +167,12 @@ export default function TransactionsPage() {
 
       <Link
         href="/transactions/new"
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-lg z-40"
+        className="fixed bottom-20 right-5 z-40 w-14 h-14 rounded-full flex items-center justify-center text-2xl font-light text-white transition-all duration-250 active:scale-95 hover:scale-105"
+        style={{
+          background: "var(--accent-primary)",
+          boxShadow:
+            "0 4px 14px rgba(15, 118, 110, 0.4), 0 1px 3px rgba(0,0,0,0.08)",
+        }}
       >
         +
       </Link>
