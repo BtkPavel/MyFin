@@ -34,13 +34,15 @@ export async function POST(request: NextRequest) {
     }
 
     const day = Math.min(28, Math.max(1, Number(paymentDay)));
+    const raw = String(body.currency ?? "").toUpperCase().trim();
+    const currencyVal = ["BYN", "USD", "RUB"].includes(raw) ? raw : "BYN";
 
     const subscription = await prisma.subscription.create({
       data: {
         userId,
         name,
         amount: new Decimal(amount),
-        currency: currency || "BYN",
+        currency: currencyVal,
         paymentDay: day,
         status: "ACTIVE",
       },

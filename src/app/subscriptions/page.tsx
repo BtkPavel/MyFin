@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CurrencyConverter from "@/components/CurrencyConverter";
 import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
@@ -133,10 +133,13 @@ function SubscriptionForm({
   const [currency, setCurrency] = useState("BYN");
   const [paymentDay, setPaymentDay] = useState("15");
   const [submitting, setSubmitting] = useState(false);
+  const currencySelectRef = useRef<HTMLSelectElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !amount) return;
+    const currencyVal =
+      (currencySelectRef.current?.value as "BYN" | "USD" | "RUB") || "BYN";
     setSubmitting(true);
     try {
       const res = await fetchWithTimeout("/api/subscriptions", {
@@ -145,7 +148,7 @@ function SubscriptionForm({
         body: JSON.stringify({
           name,
           amount: parseFloat(amount),
-          currency,
+          currency: currencyVal,
           paymentDay: Math.min(28, Math.max(1, parseInt(paymentDay, 10) || 15)),
         }),
       });
@@ -195,6 +198,7 @@ function SubscriptionForm({
           Валюта
         </label>
         <select
+          ref={currencySelectRef}
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
           className="input-field"
