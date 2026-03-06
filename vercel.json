@@ -4,10 +4,6 @@
     {
       "path": "/api/cron/update-rates",
       "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/keep-warm",
-      "schedule": "*/5 * * * *"
     }
   ]
 }
