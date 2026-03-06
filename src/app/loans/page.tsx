@@ -28,8 +28,9 @@ export default function LoansPage() {
   const loadLoans = () => {
     fetch("/api/loans")
       .then((r) => r.json())
+      .then((data) => (Array.isArray(data) ? data : []))
+      .catch(() => [])
       .then(setLoans)
-      .catch(console.error)
       .finally(() => setLoading(false));
   };
 

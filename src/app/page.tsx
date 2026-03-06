@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showOpeningBalanceForm, setShowOpeningBalanceForm] = useState(false);
   const [openingBalanceInput, setOpeningBalanceInput] = useState("");
+  const [savingBalance, setSavingBalance] = useState(false);
 
   const loadData = () => {
     const from = new Date();
@@ -72,17 +73,30 @@ export default function DashboardPage() {
   }, [summary]);
 
   const saveOpeningBalance = async () => {
-    const value = parseFloat(openingBalanceInput);
-    if (isNaN(value)) return;
-    const res = await fetch("/api/user", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ openingBalance: value }),
-    });
-    if (res.ok) {
-      setShowOpeningBalanceForm(false);
-      setOpeningBalanceInput("");
-      loadData();
+    const value = parseFloat(String(openingBalanceInput).replace(",", "."));
+    if (isNaN(value)) {
+      alert("Введите корректную сумму");
+      return;
+    }
+    setSavingBalance(true);
+    try {
+      const res = await fetch("/api/user", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ openingBalance: value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setShowOpeningBalanceForm(false);
+        setOpeningBalanceInput("");
+        loadData();
+      } else {
+        alert(data?.error || "Ошибка сохранения");
+      }
+    } catch {
+      alert("Ошибка сети");
+    } finally {
+      setSavingBalance(false);
     }
   };
 
@@ -102,17 +116,24 @@ export default function DashboardPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#0F766E] via-[#0F766E] to-[#134E4A] opacity-95" />
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-        <div className="relative pt-6 pb-4">
-          <h1 className="text-xl font-semibold tracking-tight">MyFin</h1>
-          <p className="text-white/70 text-sm font-normal mt-0.5">
-            Контроль финансов
-          </p>
-          <p className="text-[10px] tracking-widest uppercase text-white/50 mt-4">
-            {new Date().toLocaleDateString("ru-BY", {
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
+        <div className="relative pt-6 pb-4 flex items-center gap-4">
+          <img
+            src="/icons/icon-192.png"
+            alt="MyFin"
+            className="w-12 h-12 rounded-[12px] shrink-0 shadow-lg"
+          />
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight">MyFin</h1>
+            <p className="text-white/70 text-sm font-normal mt-0.5">
+              Контроль финансов
+            </p>
+            <p className="text-[10px] tracking-widest uppercase text-white/50 mt-4">
+              {new Date().toLocaleDateString("ru-BY", {
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
         </div>
       </header>
 
@@ -168,9 +189,10 @@ export default function DashboardPage() {
                     <button
                       type="button"
                       onClick={saveOpeningBalance}
-                      className="btn-primary shrink-0"
+                      disabled={savingBalance}
+                      className="btn-primary shrink-0 disabled:opacity-50"
                     >
-                      Сохранить
+                      {savingBalance ? "Сохранение…" : "Сохранить"}
                     </button>
                     <button
                       type="button"

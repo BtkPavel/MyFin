@@ -24,8 +24,9 @@ export default function ReservationsPage() {
   const loadReservations = () => {
     fetch("/api/reservations")
       .then((r) => r.json())
+      .then((data) => (Array.isArray(data) ? data : []))
+      .catch(() => [])
       .then(setReservations)
-      .catch(console.error)
       .finally(() => setLoading(false));
   };
 
