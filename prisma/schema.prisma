@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  baseCurrency String        @default("BYN")
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+  loans        Loan[]
+  reservations Reservation[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String        @id @default(cuid())
+  name        String
+  type        String // INCOME | EXPENSE
+  icon        String?
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String // INCOME | EXPENSE
+  amount      Decimal
+  currency    String   @default("BYN")
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  date        DateTime
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@map("transactions")
+}
+
+model Loan {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  type            String // LOAN | INSTALLMENT
+  totalAmount     Decimal
+  currency        String   @default("BYN")
+  monthlyPayment  Decimal
+  remainingAmount Decimal
+  startDate       DateTime
+  endDate         DateTime
+  dueDay          Int // день месяца платежа (1-28)
+  status          String   @default("ACTIVE") // ACTIVE | PAID | OVERDUE
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@map("loans")
+}
+
+model Reservation {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  targetAmount  Decimal
+  currentAmount Decimal  @default(0)
+  currency      String   @default("BYN")
+  deadline      DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@map("reservations")
+}
+
+model ExchangeRate {
+  id       String   @id @default(cuid())
+  fromCurr String // BYN
+  toCurr   String // USD | RUB
+  rate     Decimal
+  date     DateTime
+
+  @@unique([fromCurr, toCurr, date])
+  @@index([date])
+  @@map("exchange_rates")
+}
