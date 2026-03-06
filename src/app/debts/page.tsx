@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import CurrencyConverter from "@/components/CurrencyConverter";
 import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
@@ -40,15 +41,6 @@ export default function DebtsPage() {
   const deleteDebt = async (id: string) => {
     if (!confirm("Удалить запись?")) return;
     const res = await fetch(`/api/debts/${id}`, { method: "DELETE" });
-    if (res.ok) loadDebts();
-  };
-
-  const markPaid = async (id: string) => {
-    const res = await fetch(`/api/debts/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "PAID" }),
-    });
     if (res.ok) loadDebts();
   };
 
@@ -109,7 +101,6 @@ export default function DebtsPage() {
                     <DebtCard
                       key={d.id}
                       debt={d}
-                      onMarkPaid={markPaid}
                       onDelete={deleteDebt}
                       CurrencyConverter={CurrencyConverter}
                     />
@@ -143,7 +134,6 @@ export default function DebtsPage() {
                     <DebtCard
                       key={d.id}
                       debt={d}
-                      onMarkPaid={markPaid}
                       onDelete={deleteDebt}
                       CurrencyConverter={CurrencyConverter}
                     />
@@ -163,7 +153,6 @@ export default function DebtsPage() {
                       key={d.id}
                       debt={d}
                       isPaid
-                      onMarkPaid={markPaid}
                       onDelete={deleteDebt}
                       CurrencyConverter={CurrencyConverter}
                     />
@@ -188,13 +177,11 @@ export default function DebtsPage() {
 function DebtCard({
   debt,
   isPaid,
-  onMarkPaid,
   onDelete,
   CurrencyConverter,
 }: {
   debt: Debt;
   isPaid?: boolean;
-  onMarkPaid: (id: string) => void;
   onDelete: (id: string) => void;
   CurrencyConverter: React.ComponentType<{ amount: number; className?: string }>;
 }) {
@@ -207,40 +194,38 @@ function DebtCard({
         isPaid ? "line-through opacity-70" : ""
       }`}
     >
-      <div
-        className={`w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center text-lg shrink-0 ${
-          isOwedToMe
-            ? "bg-[var(--accent-income-muted)] text-[var(--accent-income)]"
-            : "bg-[var(--accent-expense-muted)] text-[var(--accent-expense)]"
-        }`}
+      <Link
+        href={`/debts/${debt.id}`}
+        className="flex flex-1 min-w-0 items-center gap-4 active:opacity-80"
       >
-        {isOwedToMe ? "↑" : "↓"}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-[var(--text-primary)]">{debt.name}</p>
-        {debt.description && (
-          <p className="text-[11px] text-[var(--text-tertiary)] truncate">
-            {debt.description}
-          </p>
-        )}
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <CurrencyConverter amount={amt} />
-        {!isPaid && (
-          <button
-            onClick={() => onMarkPaid(debt.id)}
-            className="px-2 py-1 rounded-[var(--radius-sm)] text-[11px] font-medium bg-[var(--accent-primary-muted)] text-[var(--accent-primary)]"
-          >
-            Погасить
-          </button>
-        )}
-        <button
-          onClick={() => onDelete(debt.id)}
-          className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:text-[var(--accent-expense)] hover:bg-[var(--accent-expense-muted)]"
+        <div
+          className={`w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center text-lg shrink-0 ${
+            isOwedToMe
+              ? "bg-[var(--accent-income-muted)] text-[var(--accent-income)]"
+              : "bg-[var(--accent-expense-muted)] text-[var(--accent-expense)]"
+          }`}
         >
-          ⌫
-        </button>
-      </div>
+          {isOwedToMe ? "↑" : "↓"}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-[var(--text-primary)]">{debt.name}</p>
+          {debt.description && (
+            <p className="text-[11px] text-[var(--text-tertiary)] truncate">
+              {debt.description}
+            </p>
+          )}
+        </div>
+        <CurrencyConverter amount={amt} />
+      </Link>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          onDelete(debt.id);
+        }}
+        className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:text-[var(--accent-expense)] hover:bg-[var(--accent-expense-muted)] shrink-0"
+      >
+        ⌫
+      </button>
     </div>
   );
 }
