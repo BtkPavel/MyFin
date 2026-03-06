@@ -231,7 +231,7 @@ function DebtCard({
             onClick={() => onMarkPaid(debt.id)}
             className="px-2 py-1 rounded-[var(--radius-sm)] text-[11px] font-medium bg-[var(--accent-primary-muted)] text-[var(--accent-primary)]"
           >
-            Погашен
+            Погасить
           </button>
         )}
         <button
