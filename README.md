@@ -46,14 +46,22 @@ npm run dev
 
 ## Деплой (Vercel)
 
+### Быстрая настройка (Neon + Vercel CLI)
+
+Если у вас уже есть `.env.vercel` с DATABASE_URL (создан через `npx get-db`):
+
+```bash
+vercel login          # один раз
+./scripts/setup-vercel-db.sh
+git push               # или npx vercel --prod
+```
+
+### Ручная настройка
+
 1. Подключите репозиторий к Vercel.
 2. Создайте PostgreSQL:
-   - Vercel: Storage → Create Database → Postgres
-   - Или: [Neon.tech](https://neon.tech) / [Supabase](https://supabase.com) (бесплатно)
-3. Добавьте `DATABASE_URL` (строка подключения Postgres) в Environment Variables.
-4. После первого деплоя выполните миграции и seed (через Vercel CLI или локально, подключившись к той же БД):
-   ```bash
-   npx prisma db push
-   npx prisma db seed
-   ```
+   - [Neon.tech](https://neon.tech) (бесплатно): `npx get-db --yes` создаст БД и `.env`
+   - Или: Vercel Storage → Postgres, [Supabase](https://supabase.com)
+3. В Vercel → Settings → Environment Variables добавьте `DATABASE_URL` (Production).
+4. Redeploy проекта.
 5. Опционально: `CRON_SECRET` для защиты cron.
