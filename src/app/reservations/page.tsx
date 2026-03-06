@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CurrencyConverter from "@/components/CurrencyConverter";
+import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
 interface Reservation {
   id: string;
@@ -215,18 +216,27 @@ function ReservationForm({
     e.preventDefault();
     if (!name || !targetAmount) return;
     setSubmitting(true);
-    const res = await fetch("/api/reservations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        targetAmount: parseFloat(targetAmount),
-        deadline: deadline || undefined,
-      }),
-    });
-    setSubmitting(false);
-    if (res.ok) onSuccess();
-    else alert("Ошибка при сохранении");
+    try {
+      const res = await fetchWithTimeout("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          targetAmount: parseFloat(targetAmount),
+          deadline: deadline || undefined,
+        }),
+      });
+      if (res.ok) onSuccess();
+      else alert("Ошибка при сохранении");
+    } catch (err) {
+      alert(
+        err instanceof Error && err.message === "TIMEOUT"
+          ? SLOW_SERVER_MSG
+          : "Ошибка сети"
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

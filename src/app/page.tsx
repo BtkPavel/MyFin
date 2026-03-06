@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import CurrencyConverter from "@/components/CurrencyConverter";
 import AddTransactionButton from "@/components/AddTransactionButton";
+import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
 interface Summary {
   income: number;
@@ -80,7 +81,7 @@ export default function DashboardPage() {
     }
     setSavingBalance(true);
     try {
-      const res = await fetch("/api/user", {
+      const res = await fetchWithTimeout("/api/user", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ openingBalance: value }),
@@ -93,8 +94,12 @@ export default function DashboardPage() {
       } else {
         alert(data?.error || "Ошибка сохранения");
       }
-    } catch {
-      alert("Ошибка сети");
+    } catch (err) {
+      alert(
+        err instanceof Error && err.message === "TIMEOUT"
+          ? SLOW_SERVER_MSG
+          : "Ошибка сети"
+      );
     } finally {
       setSavingBalance(false);
     }

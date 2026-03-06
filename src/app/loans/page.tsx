@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CurrencyConverter from "@/components/CurrencyConverter";
+import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
 interface Loan {
   id: string;
@@ -130,17 +131,21 @@ function LoanCard({
   const recordPayment = async () => {
     const amount = parseFloat(loan.monthlyPayment);
     const newRemaining = Math.max(0, remaining - amount);
-    const res = await fetch(`/api/loans/${loan.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        remainingAmount: newRemaining,
-        status: newRemaining <= 0 ? "PAID" : loan.status,
-      }),
-    });
-    if (res.ok) {
-      setShowPay(false);
-      onUpdate();
+    try {
+      const res = await fetchWithTimeout(`/api/loans/${loan.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          remainingAmount: newRemaining,
+          status: newRemaining <= 0 ? "PAID" : loan.status,
+        }),
+      });
+      if (res.ok) {
+        setShowPay(false);
+        onUpdate();
+      }
+    } catch {
+      alert(SLOW_SERVER_MSG);
     }
   };
 
@@ -229,22 +234,31 @@ function LoanForm({
     if (!name || !totalAmount || !monthlyPayment || !startDate || !endDate)
       return;
     setSubmitting(true);
-    const res = await fetch("/api/loans", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        type,
-        totalAmount: parseFloat(totalAmount),
-        monthlyPayment: parseFloat(monthlyPayment),
-        startDate: new Date(startDate).toISOString(),
-        endDate: new Date(endDate).toISOString(),
-        dueDay: parseInt(dueDay, 10),
-      }),
-    });
-    setSubmitting(false);
-    if (res.ok) onSuccess();
-    else alert("Ошибка при сохранении");
+    try {
+      const res = await fetchWithTimeout("/api/loans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          type,
+          totalAmount: parseFloat(totalAmount),
+          monthlyPayment: parseFloat(monthlyPayment),
+          startDate: new Date(startDate).toISOString(),
+          endDate: new Date(endDate).toISOString(),
+          dueDay: parseInt(dueDay, 10),
+        }),
+      });
+      if (res.ok) onSuccess();
+      else alert("Ошибка при сохранении");
+    } catch (err) {
+      alert(
+        err instanceof Error && err.message === "TIMEOUT"
+          ? SLOW_SERVER_MSG
+          : "Ошибка сети"
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

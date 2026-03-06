@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CurrencyConverter from "@/components/CurrencyConverter";
+import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
 interface Subscription {
   id: string;
@@ -137,19 +138,28 @@ function SubscriptionForm({
     e.preventDefault();
     if (!name || !amount) return;
     setSubmitting(true);
-    const res = await fetch("/api/subscriptions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        amount: parseFloat(amount),
-        currency,
-        paymentDay: Math.min(28, Math.max(1, parseInt(paymentDay, 10) || 15)),
-      }),
-    });
-    setSubmitting(false);
-    if (res.ok) onSuccess();
-    else alert("Ошибка при сохранении");
+    try {
+      const res = await fetchWithTimeout("/api/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          amount: parseFloat(amount),
+          currency,
+          paymentDay: Math.min(28, Math.max(1, parseInt(paymentDay, 10) || 15)),
+        }),
+      });
+      if (res.ok) onSuccess();
+      else alert("Ошибка при сохранении");
+    } catch (err) {
+      alert(
+        err instanceof Error && err.message === "TIMEOUT"
+          ? SLOW_SERVER_MSG
+          : "Ошибка сети"
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

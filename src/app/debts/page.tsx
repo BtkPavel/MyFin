@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CurrencyConverter from "@/components/CurrencyConverter";
+import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
 
 interface Debt {
   id: string;
@@ -264,20 +265,29 @@ function DebtForm({
     e.preventDefault();
     if (!name || !amount) return;
     setSubmitting(true);
-    const res = await fetch("/api/debts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type,
-        name,
-        amount: parseFloat(amount),
-        currency,
-        description: description || null,
-      }),
-    });
-    setSubmitting(false);
-    if (res.ok) onSuccess();
-    else alert("Ошибка при сохранении");
+    try {
+      const res = await fetchWithTimeout("/api/debts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          name,
+          amount: parseFloat(amount),
+          currency,
+          description: description || null,
+        }),
+      });
+      if (res.ok) onSuccess();
+      else alert("Ошибка при сохранении");
+    } catch (err) {
+      alert(
+        err instanceof Error && err.message === "TIMEOUT"
+          ? SLOW_SERVER_MSG
+          : "Ошибка сети"
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
