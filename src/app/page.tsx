@@ -188,21 +188,21 @@ export default function DashboardPage() {
                       step="0.01"
                       value={openingBalanceInput}
                       onChange={(e) => setOpeningBalanceInput(e.target.value)}
-                      className="input-field flex-1 py-2.5"
+                      className="input-field flex-1"
                       placeholder="0"
                     />
                     <button
                       type="button"
                       onClick={saveOpeningBalance}
                       disabled={savingBalance}
-                      className="btn-primary shrink-0 disabled:opacity-50"
+                      className="btn-primary shrink-0 py-3 disabled:opacity-50"
                     >
                       {savingBalance ? "Сохранение…" : "Сохранить"}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowOpeningBalanceForm(false)}
-                      className="px-3 py-2.5 rounded-[var(--radius-md)] bg-[var(--border-subtle)] text-[var(--text-secondary)] font-medium text-sm"
+                      className="px-4 py-3 rounded-[var(--radius-md)] bg-[var(--border-subtle)] text-[var(--text-secondary)] font-medium text-sm"
                     >
                       Отмена
                     </button>

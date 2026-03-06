@@ -235,7 +235,7 @@ export default function NewTransactionPage() {
               !amount ||
               (isInstallmentPayment && (!loanId || activeLoans.length === 0))
             }
-            className="w-full py-3.5 btn-primary text-base disabled:opacity-50"
+            className="w-full py-3 btn-primary disabled:opacity-50"
           >
             {submitting ? "Сохранение..." : "Сохранить"}
           </button>

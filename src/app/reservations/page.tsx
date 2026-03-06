@@ -177,19 +177,19 @@ function ReservationCard({
             placeholder="Сумма"
             value={addAmount}
             onChange={(e) => setAddAmount(e.target.value)}
-            className="input-field mb-2 py-2.5"
+            className="input-field mb-3"
           />
           <div className="flex gap-2">
             <button
               onClick={addToReserve}
               disabled={!addAmount || parseFloat(addAmount) <= 0}
-              className="flex-1 py-2 btn-primary text-sm disabled:opacity-50"
+              className="flex-1 py-3 btn-primary text-sm disabled:opacity-50"
             >
               Добавить
             </button>
             <button
               onClick={() => setShowAdd(false)}
-              className="flex-1 py-2 rounded-[var(--radius-md)] bg-[var(--border-subtle)] text-[var(--text-secondary)] text-sm font-medium"
+              className="flex-1 py-3 rounded-[var(--radius-md)] bg-[var(--border-subtle)] text-[var(--text-secondary)] text-sm font-medium"
             >
               Отмена
             </button>

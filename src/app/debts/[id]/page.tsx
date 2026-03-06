@@ -123,14 +123,14 @@ export default function DebtDetailPage() {
             <CurrencyConverter amount={amt} className="text-lg" />
           </div>
           {isPaid ? (
-            <div className="py-3 px-4 rounded-[var(--radius-md)] bg-[var(--accent-primary-muted)] text-[var(--accent-primary)] font-medium text-center">
+            <div className="min-h-[48px] flex items-center justify-center py-3 px-4 rounded-[var(--radius-md)] bg-[var(--accent-primary-muted)] text-[var(--accent-primary)] font-medium">
               Погашено
             </div>
           ) : (
             <button
               onClick={repay}
               disabled={submitting}
-              className="w-full py-4 btn-primary disabled:opacity-50"
+              className="w-full py-3 btn-primary disabled:opacity-50"
             >
               {submitting ? "Сохранение…" : "Погасить"}
             </button>

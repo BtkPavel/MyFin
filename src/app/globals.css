@@ -67,7 +67,7 @@
     background: var(--accent-primary-hover);
   }
   .input-field {
-    @apply w-full px-4 py-3 rounded-[var(--radius-md)];
+    @apply w-full min-h-[48px] px-4 py-3 rounded-[var(--radius-md)];
     @apply border border-[var(--border-strong)] bg-white;
     @apply text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)];
     @apply focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:ring-offset-1;

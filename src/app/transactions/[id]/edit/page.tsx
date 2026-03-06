@@ -191,7 +191,7 @@ export default function EditTransactionPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3.5 btn-primary disabled:opacity-50"
+            className="w-full py-3 btn-primary disabled:opacity-50"
           >
             {submitting ? "Сохранение..." : "Сохранить"}
           </button>
