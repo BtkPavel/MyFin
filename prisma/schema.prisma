@@ -3,20 +3,36 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id             String        @id @default(cuid())
-  baseCurrency   String        @default("BYN")
-  openingBalance Decimal       @default(0)
+  id             String         @id @default(cuid())
+  baseCurrency   String         @default("BYN")
+  openingBalance Decimal        @default(0)
   createdAt      DateTime      @default(now())
   transactions   Transaction[]
   loans          Loan[]
   reservations  Reservation[]
+  subscriptions  Subscription[]
 
   @@map("users")
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  amount      Decimal
+  currency    String   @default("BYN")
+  paymentDay  Int      // день месяца (1-28)
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("subscriptions")
 }
 
 model Category {

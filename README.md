@@ -5,7 +5,7 @@
 ## Технологии
 
 - Next.js 14 (App Router)
-- Prisma + SQLite
+- Prisma + PostgreSQL
 - Tailwind CSS
 - PWA (manifest + Service Worker)
 
@@ -15,7 +15,10 @@
 # Установка зависимостей
 npm install
 
-# Создание БД и seed категорий
+# Настройте DATABASE_URL в .env (PostgreSQL)
+# Бесплатно: Neon.tech, Supabase или Vercel Postgres
+
+# Создание таблиц и seed категорий
 npx prisma db push
 npx prisma db seed
 
@@ -44,7 +47,13 @@ npm run dev
 ## Деплой (Vercel)
 
 1. Подключите репозиторий к Vercel.
-2. Добавьте `DATABASE_URL` (для SQLite используйте Vercel KV или перейдите на PostgreSQL).
-3. Опционально: `CRON_SECRET` для защиты cron.
-
-При использовании SQLite на Vercel учтите [ограничения](https://vercel.com/docs/storage/vercel-postgres) — для production рекомендуется PostgreSQL.
+2. Создайте PostgreSQL:
+   - Vercel: Storage → Create Database → Postgres
+   - Или: [Neon.tech](https://neon.tech) / [Supabase](https://supabase.com) (бесплатно)
+3. Добавьте `DATABASE_URL` (строка подключения Postgres) в Environment Variables.
+4. После первого деплоя выполните миграции и seed (через Vercel CLI или локально, подключившись к той же БД):
+   ```bash
+   npx prisma db push
+   npx prisma db seed
+   ```
+5. Опционально: `CRON_SECRET` для защиты cron.

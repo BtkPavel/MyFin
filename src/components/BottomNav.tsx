@@ -7,11 +7,11 @@ const tabs = [
   { href: "/", label: "Обзор", icon: "◇" },
   { href: "/transactions", label: "Операции", icon: "▤" },
   { href: "/loans", label: "Кредиты", icon: "◈" },
-  { href: "/reservations", label: "Резервы", icon: "◎" },
+  { href: "/subscriptions", label: "Подписки", icon: "◎" },
+  { href: "/reservations", label: "Резервы", icon: "◆" },
 ];
 
-// Fallback to emoji if symbols render poorly
-const tabIcons = ["📊", "📝", "💳", "🎯"];
+const tabIcons = ["📊", "📝", "💳", "📅", "🎯"];
 
 export default function BottomNav() {
   const pathname = usePathname();

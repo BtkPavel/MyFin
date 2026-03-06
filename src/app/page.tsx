@@ -36,14 +36,31 @@ export default function DashboardPage() {
     Promise.all([
       fetch(
         `/api/transactions/summary?from=${from.toISOString()}&to=${to.toISOString()}`
-      ).then((r) => r.json()),
-      fetch("/api/transactions").then((r) => r.json()),
+      )
+        .then((r) => r.json())
+        .then((s) =>
+          s?.error
+            ? { income: 0, expenses: 0, balance: 0, openingBalance: 0, totalBalance: 0 }
+            : s
+        ),
+      fetch("/api/transactions")
+        .then((r) => r.json())
+        .then((t) => (Array.isArray(t) ? t : [])),
     ])
       .then(([s, t]) => {
         setSummary(s);
-        setTransactions(Array.isArray(t) ? t.slice(0, 5) : []);
+        setTransactions(t.slice(0, 5));
       })
-      .catch(console.error);
+      .catch(() => {
+        setSummary({
+          income: 0,
+          expenses: 0,
+          balance: 0,
+          openingBalance: 0,
+          totalBalance: 0,
+        });
+        setTransactions([]);
+      });
   };
 
   useEffect(() => {
@@ -69,8 +86,15 @@ export default function DashboardPage() {
     }
   };
 
-  const format = (n: number) =>
-    n.toLocaleString("ru-BY", { minimumFractionDigits: 2 });
+  const format = (n: number) => {
+    const num = Number(n);
+    if (isNaN(num)) return "0.00";
+    try {
+      return num.toLocaleString("ru-BY", { minimumFractionDigits: 2 });
+    } catch {
+      return num.toFixed(2);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -107,7 +131,7 @@ export default function DashboardPage() {
               <div className="text-[28px] font-semibold text-[var(--text-primary)] tabular-nums tracking-tight">
                 {summary && (
                   <CurrencyConverter
-                    amount={summary.totalBalance}
+                    amount={Number(summary.totalBalance) || 0}
                     className="text-[28px]"
                   />
                 )}

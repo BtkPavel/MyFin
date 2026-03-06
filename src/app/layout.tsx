@@ -3,6 +3,7 @@ import "./globals.css";
 import MobileGuard from "@/components/MobileGuard";
 import BottomNav from "@/components/BottomNav";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "MyFin — Контроль финансов",
@@ -30,12 +31,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className="min-h-screen bg-[var(--bg-base)] font-outfit antialiased pb-20">
-        <ServiceWorkerRegistration />
-        <MobileGuard>
-          {children}
-          <BottomNav />
-        </MobileGuard>
+      <body className="min-h-screen bg-[#FAFAF9] antialiased pb-20" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
+        <ErrorBoundary>
+          <ServiceWorkerRegistration />
+          <MobileGuard>
+            {children}
+            <BottomNav />
+          </MobileGuard>
+        </ErrorBoundary>
       </body>
     </html>
   );
