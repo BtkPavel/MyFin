@@ -40,13 +40,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const raw = String(body.currency ?? "").toUpperCase().trim();
+    const currencyVal = ["BYN", "USD", "RUB"].includes(raw) ? raw : "BYN";
+
     const debt = await prisma.debt.create({
       data: {
         userId,
         type,
         name,
         amount: new Decimal(amount),
-        currency: currency || "BYN",
+        currency: currencyVal,
         description: description || null,
         status: "ACTIVE",
       },

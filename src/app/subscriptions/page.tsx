@@ -98,7 +98,14 @@ export default function SubscriptionsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <CurrencyConverter amount={parseFloat(sub.amount)} />
+                  <CurrencyConverter
+                    amount={parseFloat(sub.amount)}
+                    fromCurrency={
+                      sub.currency === "USD" || sub.currency === "RUB"
+                        ? sub.currency
+                        : "BYN"
+                    }
+                  />
                   <button
                     onClick={() => deleteSubscription(sub.id)}
                     className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:text-[var(--accent-expense)] hover:bg-[var(--accent-expense-muted)]"

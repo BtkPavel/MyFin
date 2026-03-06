@@ -120,7 +120,15 @@ export default function DebtDetailPage() {
             </p>
           )}
           <div className="flex items-center gap-2 mb-6">
-            <CurrencyConverter amount={amt} className="text-lg" />
+            <CurrencyConverter
+              amount={amt}
+              fromCurrency={
+                debt.currency === "USD" || debt.currency === "RUB"
+                  ? debt.currency
+                  : "BYN"
+              }
+              className="text-lg"
+            />
           </div>
           {isPaid ? (
             <div className="min-h-[48px] flex items-center justify-center py-3 px-4 rounded-[var(--radius-md)] bg-[var(--accent-primary-muted)] text-[var(--accent-primary)] font-medium">

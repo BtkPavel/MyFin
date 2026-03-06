@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import CurrencyConverter from "@/components/CurrencyConverter";
 import { fetchWithTimeout, SLOW_SERVER_MSG } from "@/lib/api";
@@ -183,23 +183,30 @@ function DebtCard({
   debt: Debt;
   isPaid?: boolean;
   onDelete: (id: string) => void;
-  CurrencyConverter: React.ComponentType<{ amount: number; className?: string }>;
+  CurrencyConverter: React.ComponentType<{
+    amount: number;
+    fromCurrency?: "BYN" | "USD" | "RUB";
+    className?: string;
+  }>;
 }) {
   const amt = parseFloat(debt.amount);
   const isOwedToMe = debt.type === "OWED_TO_ME";
+  const debtCurrency = (debt.currency === "USD" || debt.currency === "RUB"
+    ? debt.currency
+    : "BYN") as "BYN" | "USD" | "RUB";
 
   return (
     <div
-      className={`card flex items-center gap-4 p-4 ${
+      className={`card flex flex-col sm:flex-row sm:items-center gap-3 p-4 ${
         isPaid ? "line-through opacity-70" : ""
       }`}
     >
       <Link
         href={`/debts/${debt.id}`}
-        className="flex flex-1 min-w-0 items-center gap-4 active:opacity-80"
+        className="flex min-w-0 flex-1 flex-col gap-1 active:opacity-80 sm:flex-row sm:items-center sm:gap-4"
       >
         <div
-          className={`w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center text-lg shrink-0 ${
+          className={`w-10 h-10 shrink-0 rounded-[var(--radius-md)] flex items-center justify-center text-lg ${
             isOwedToMe
               ? "bg-[var(--accent-income-muted)] text-[var(--accent-income)]"
               : "bg-[var(--accent-expense-muted)] text-[var(--accent-expense)]"
@@ -207,22 +214,29 @@ function DebtCard({
         >
           {isOwedToMe ? "↑" : "↓"}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-[var(--text-primary)]">{debt.name}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium text-[var(--text-primary)]">
+            {debt.name}
+          </p>
           {debt.description && (
-            <p className="text-[11px] text-[var(--text-tertiary)] truncate">
+            <p className="truncate text-[11px] text-[var(--text-tertiary)]">
               {debt.description}
             </p>
           )}
         </div>
-        <CurrencyConverter amount={amt} />
+        <div className="shrink-0">
+          <CurrencyConverter
+            amount={amt}
+            fromCurrency={debtCurrency}
+          />
+        </div>
       </Link>
       <button
         onClick={(e) => {
           e.preventDefault();
           onDelete(debt.id);
         }}
-        className="w-8 h-8 flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:text-[var(--accent-expense)] hover:bg-[var(--accent-expense-muted)] shrink-0"
+        className="h-8 w-8 shrink-0 self-end flex items-center justify-center rounded-[var(--radius-sm)] text-[var(--text-tertiary)] hover:bg-[var(--accent-expense-muted)] hover:text-[var(--accent-expense)] sm:self-auto"
       >
         ⌫
       </button>
@@ -245,10 +259,13 @@ function DebtForm({
   const [currency, setCurrency] = useState("BYN");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const currencySelectRef = useRef<HTMLSelectElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !amount) return;
+    const currencyVal =
+      (currencySelectRef.current?.value as "BYN" | "USD" | "RUB") || "BYN";
     setSubmitting(true);
     try {
       const res = await fetchWithTimeout("/api/debts", {
@@ -258,7 +275,7 @@ function DebtForm({
           type,
           name,
           amount: parseFloat(amount),
-          currency,
+          currency: currencyVal,
           description: description || null,
         }),
       });
@@ -322,6 +339,7 @@ function DebtForm({
             Валюта
           </label>
           <select
+            ref={currencySelectRef}
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
             className="input-field"
